@@ -145,7 +145,9 @@ def scrape_jobs():
 
 def save_jobs(jobs):
 
-    file_path = f"src/jobs/linkedin/vagas-{datetime.now()}.json"
+    filename = "vagas-" + datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    file_path = f"src/jobs/linkedin/{filename}.json"
 
     with open(file_path, mode="w", encoding="utf-8") as file:
 

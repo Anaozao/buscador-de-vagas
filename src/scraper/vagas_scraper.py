@@ -31,17 +31,11 @@ def format_jobs_data():
         job_name = job.find_element(By.TAG_NAME, "a").get_attribute("title")
         job_link = job.find_element(By.TAG_NAME, "a").get_attribute("href")
         card_footer = job.find_element(By.TAG_NAME, "footer")
-        job_location = (
-            card_footer.find_element(By.CLASS_NAME, "vaga-local")
-            .find_element(By.TAG_NAME, "i")
-            .text
-        )
+        job_location = card_footer.find_element(By.CLASS_NAME, "vaga-local").text
 
-        job_release_date = (
-            card_footer.find_element(By.CLASS_NAME, "data-publicacao")
-            .find_element(By.TAG_NAME, "i")
-            .text
-        )
+        job_release_date = card_footer.find_element(
+            By.CLASS_NAME, "data-publicacao"
+        ).text
 
         job_data = {
             "name": job_name,
@@ -55,8 +49,9 @@ def format_jobs_data():
 
 
 def save_jobs(jobs: list):
+    filename = "vagas-" + datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    file_path = f"src/jobs/vagas/vagas-{datetime.now().date()}.json"
+    file_path = f"src/jobs/vagas/{filename}.json"
 
     with open(file_path, mode="w", encoding="utf-8") as file:
         file.write("[\n")
@@ -76,3 +71,4 @@ def run():
     firefox.get("https://www.vagas.com.br/vagas-de-" + query)
 
     save_jobs(format_jobs_data())
+    firefox.quit()

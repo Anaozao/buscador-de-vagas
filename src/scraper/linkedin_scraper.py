@@ -15,7 +15,7 @@ load_dotenv()
 
 url = "https://www.linkedin.com/jobs/"
 options = Options()
-# options.add_argument("--headless")
+options.add_argument("--headless")
 
 firefox = webdriver.Firefox(options=options)
 
@@ -61,7 +61,7 @@ def login(env_email, env_pass):
     enter_btn.send_keys(Keys.ENTER)
 
 
-def search(wait):
+def search(wait: WebDriverWait):
     search_input = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "jobs-search-box__text-input"))
     )
@@ -79,7 +79,9 @@ def search(wait):
 
     selected_time_range = int(input())
 
-    time_posted = firefox.find_element(By.ID, "searchFilter_timePostedRange")
+    time_posted = wait.until(
+        EC.element_to_be_clickable(((By.ID, "searchFilter_timePostedRange")))
+    )
     time_posted.click()
 
     time_options = firefox.find_elements(By.CLASS_NAME, "search-reusables__value-label")
@@ -136,4 +138,4 @@ def run():
 
     scrape_jobs()
 
-    # firefox.quit()
+    firefox.quit()

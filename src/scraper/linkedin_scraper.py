@@ -7,6 +7,7 @@ from selenium.webdriver.firefox.options import Options
 import json
 from dotenv import load_dotenv
 import os
+from tqdm import tqdm
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -15,7 +16,7 @@ load_dotenv()
 
 url = "https://www.linkedin.com/jobs/"
 options = Options()
-options.add_argument("--headless")
+# options.add_argument("--headless")
 
 firefox = webdriver.Firefox(options=options)
 
@@ -35,7 +36,7 @@ def select_time_range(selected_time_range, time_options):
         select_time_range(new_option, time_options)
 
 
-def login(env_email, env_pass, wait: WebDriverWait):
+def login(wait: WebDriverWait, env_email="", env_pass=""):
     if env_email and env_pass:
         email_input = wait.until(EC.presence_of_element_located((By.ID, "session_key")))
         email_input.send_keys(env_email)
@@ -63,6 +64,16 @@ def login(env_email, env_pass, wait: WebDriverWait):
     )
 
     enter_btn.send_keys(Keys.ENTER)
+
+    try:
+        wait.until(
+            EC.presence_of_element_located((By.CLASS_NAME, "global-nav__me-photo"))
+        )
+        print("✅ Login bem-sucedido!")
+        return True
+    except:
+        print("Senha ou usuário inválidos")
+        return False
 
 
 def search(wait: WebDriverWait):
@@ -128,21 +139,40 @@ def scrape_jobs():
         job_data = {"name": job_name, "location": metadata_info, "link": job_link}
 
         jobs.append(job_data)
+        return jobs
 
-    with open("src/jobs/vagas.json", mode="w", encoding="utf-8") as file:
-        json.dump(jobs, file, ensure_ascii=False, indent=4)
+
+def save_jobs(jobs):
+
+    file_path = "src/jobs/vagas.json"
+
+    with open(file_path, mode="w", encoding="utf-8") as file:
+
+        file.write("[\n")
+
+        for i, job in enumerate(tqdm(jobs, desc="Salvando vagas")):
+            json.dump(job, file, ensure_ascii=False, indent=4)
+            if i < len(jobs) - 1:
+                file.write(",\n")
+        file.write("\n]")
+
+    print(f"📁 Arquivo salvo com sucesso em {file_path}!")
 
 
 def run():
     firefox.get("https://www.linkedin.com/jobs/")
     wait = WebDriverWait(firefox, 10)
-    env_email = os.getenv("LINKEDIN_EMAIL")
-    env_pass = os.getenv("LINKEDIN_PASSWORD")
+    env_email = os.getenv("LINKEDIN_EMAIL") or ""
+    env_pass = os.getenv("LINKEDIN_PASSWORD") or ""
 
-    login(env_email, env_pass, wait)
+    if login(wait, env_email=env_email, env_pass=env_pass) is True:
 
-    search(wait)
+        search(wait)
 
-    scrape_jobs()
+        jobs = scrape_jobs()
 
-    firefox.quit()
+        save_jobs(jobs)
+
+        firefox.quit()
+    else:
+        login(wait)

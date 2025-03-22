@@ -1,4 +1,4 @@
-Este repositório contém um programe que faz scraping de vagas de trabalho em alguns sites.
+Este repositório contém um programa que faz scraping de vagas de trabalho em alguns sites.
 
 Até o momento o programa analisa vagas no Vagas.com e Linkedin.com.
 

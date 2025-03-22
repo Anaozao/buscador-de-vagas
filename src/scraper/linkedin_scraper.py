@@ -120,19 +120,17 @@ def scrape_jobs():
         job_name = jobs_links.get_attribute("aria-label")
         job_link = jobs_links.get_attribute("href")
 
-        print(job_name, job_link)
+        job_card_metadata = job.find_element(
+            By.CLASS_NAME, "job-card-container__metadata-wrapper"
+        )
+        metadata_info = job_card_metadata.find_element(By.TAG_NAME, "span").text
 
-    # for job in jobs_cards:
+        job_data = {"name": job_name, "location": metadata_info, "link": job_link}
 
-    #     job_name = job.get_attribute("aria-label")
-    #     job_link = job.get_attribute("href")
+        jobs.append(job_data)
 
-    #     job_data = {"vaga": job_name, "link": job_link}
-
-    #     jobs.append(job_data)
-
-    # with open("src/jobs/vagas.json", mode="w", encoding="utf-8") as file:
-    #     json.dump(jobs, file, ensure_ascii=False, indent=4)
+    with open("src/jobs/vagas.json", mode="w", encoding="utf-8") as file:
+        json.dump(jobs, file, ensure_ascii=False, indent=4)
 
 
 def run():

@@ -19,4 +19,4 @@ Para utilizar o programa (necessário ter o navegador Firefox):
     pip install -r src/requirements.txt
 
 4 - Rode o aplicativo com o comando:
-    python src/scraper/app.py (garanta que o ambiente virtual está ativo para funcionar)
+    python src/scraper/app.py (garanta que o ambiente virtual esteja ativo para funcionar)

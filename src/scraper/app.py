@@ -3,17 +3,13 @@ import importlib
 
 def choose_plataform():
 
-    print("Escolha  a plataforma de empregos: ")
+    print("Escolha a plataforma de empregos: ")
     print("1 - Linkedin")
-    print("2 - Glassdoor")
-    print("3 - Infojobs")
-    print("4 - Vagas")
+    print("2 - Vagas")
 
     options = {
         1: "linkedin_scraper",
-        2: "glassdoor_scraper",
-        3: "infojobs_scraper",
-        4: "vagas_scraper",
+        2: "vagas_scraper",
     }
 
     option = int(input())
@@ -23,6 +19,9 @@ def choose_plataform():
         print("Carregando...")
         scraper = importlib.import_module(options[option])
         scraper.run()
+    else:
+        print("Opção inválida")
+        choose_plataform()
 
 
 if __name__ == "__main__":

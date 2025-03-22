@@ -8,6 +8,7 @@ import json
 from dotenv import load_dotenv
 import os
 from tqdm import tqdm
+from datetime import datetime
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -16,7 +17,7 @@ load_dotenv()
 
 url = "https://www.linkedin.com/jobs/"
 options = Options()
-# options.add_argument("--headless")
+options.add_argument("--headless")
 
 firefox = webdriver.Firefox(options=options)
 
@@ -144,7 +145,7 @@ def scrape_jobs():
 
 def save_jobs(jobs):
 
-    file_path = "src/jobs/vagas.json"
+    file_path = f"src/jobs/linkedin/vagas-{datetime.now()}.json"
 
     with open(file_path, mode="w", encoding="utf-8") as file:
 

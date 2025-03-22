@@ -17,7 +17,7 @@ load_dotenv()
 
 url = "https://www.linkedin.com/jobs/"
 options = Options()
-options.add_argument("--headless")
+# options.add_argument("--headless")
 
 firefox = webdriver.Firefox(options=options)
 
@@ -53,17 +53,19 @@ def login(wait: WebDriverWait, env_email="", env_pass=""):
         password = getpass.getpass("Digite sua senha: ")
 
         email_input = wait.until(EC.presence_of_element_located((By.ID, "session_key")))
+        sleep(1)
         email_input.send_keys(email)
 
         password_input = wait.until(
             EC.presence_of_element_located((By.ID, "session_password"))
         )
+        sleep(1)
         password_input.send_keys(password)
 
     enter_btn = firefox.find_element(
         By.CLASS_NAME, "sign-in-form__submit-btn--full-width"
     )
-
+    sleep(3)
     enter_btn.send_keys(Keys.ENTER)
 
     try:

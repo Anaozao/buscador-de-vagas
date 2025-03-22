@@ -6,7 +6,7 @@ Utilizando Python e Selenium, o programa coleta e salva os dados das vagas em /s
 
 Crie o arquivo .env conforme o exemplo (.env.example) para adicionar os dados de login do LinkedIn para login automatico. Caso não queira, ao rodar o programa será solicitado as credenciais para logar manualmente.
 
-Para utilizar o programa:
+Para utilizar o programa (necessário ter o navegador Firefox):
 
 1 - Clone o repositório
 

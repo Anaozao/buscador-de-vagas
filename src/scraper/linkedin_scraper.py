@@ -35,12 +35,14 @@ def select_time_range(selected_time_range, time_options):
         select_time_range(new_option, time_options)
 
 
-def login(env_email, env_pass):
+def login(env_email, env_pass, wait: WebDriverWait):
     if env_email and env_pass:
-        email_input = firefox.find_element(By.ID, "session_key")
+        email_input = wait.until(EC.presence_of_element_located((By.ID, "session_key")))
         email_input.send_keys(env_email)
 
-        password_input = firefox.find_element(By.ID, "session_password")
+        password_input = wait.until(
+            EC.presence_of_element_located((By.ID, "session_password"))
+        )
         password_input.send_keys(env_pass)
 
     else:
@@ -48,10 +50,12 @@ def login(env_email, env_pass):
         email = input("Digite seu e-mail: ")
         password = getpass.getpass("Digite sua senha: ")
 
-        email_input = firefox.find_element(By.ID, "session_key")
+        email_input = wait.until(EC.presence_of_element_located((By.ID, "session_key")))
         email_input.send_keys(email)
 
-        password_input = firefox.find_element(By.ID, "session_password")
+        password_input = wait.until(
+            EC.presence_of_element_located((By.ID, "session_password"))
+        )
         password_input.send_keys(password)
 
     enter_btn = firefox.find_element(
@@ -95,16 +99,14 @@ def search(wait: WebDriverWait):
 
 
 def scrape_jobs():
-    jobs_cards = firefox.find_elements(By.CLASS_NAME, "job-card-container__link")
+    jobs_cards = firefox.find_elements(By.CLASS_NAME, "job-card-container")
 
     while True:
         last_job = jobs_cards[-1]
         last_job.location_once_scrolled_into_view
         sleep(2)
 
-        new_jobs_cards = firefox.find_elements(
-            By.CLASS_NAME, "job-card-container__link"
-        )
+        new_jobs_cards = firefox.find_elements(By.CLASS_NAME, "job-card-container")
 
         if len(new_jobs_cards) == len(jobs_cards):
             break
@@ -112,18 +114,25 @@ def scrape_jobs():
         jobs_cards = new_jobs_cards
 
     jobs = []
-
     for job in jobs_cards:
+        jobs_links = job.find_element(By.CLASS_NAME, "job-card-container__link")
 
-        job_name = job.get_attribute("aria-label")
-        job_link = job.get_attribute("href")
+        job_name = jobs_links.get_attribute("aria-label")
+        job_link = jobs_links.get_attribute("href")
 
-        job_data = {"vaga": job_name, "link": job_link}
+        print(job_name, job_link)
 
-        jobs.append(job_data)
+    # for job in jobs_cards:
 
-    with open("src/jobs/vagas.json", mode="w", encoding="utf-8") as file:
-        json.dump(jobs, file, ensure_ascii=False, indent=4)
+    #     job_name = job.get_attribute("aria-label")
+    #     job_link = job.get_attribute("href")
+
+    #     job_data = {"vaga": job_name, "link": job_link}
+
+    #     jobs.append(job_data)
+
+    # with open("src/jobs/vagas.json", mode="w", encoding="utf-8") as file:
+    #     json.dump(jobs, file, ensure_ascii=False, indent=4)
 
 
 def run():
@@ -132,7 +141,7 @@ def run():
     env_email = os.getenv("LINKEDIN_EMAIL")
     env_pass = os.getenv("LINKEDIN_PASSWORD")
 
-    login(env_email, env_pass)
+    login(env_email, env_pass, wait)
 
     search(wait)
 

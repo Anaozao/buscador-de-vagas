@@ -11,7 +11,7 @@ from time import sleep
 from vagas_scraper import is_looping
 
 options = Options()
-
+options.add_argument("-headless")
 firefox = webdriver.Firefox(options=options)
 wait = WebDriverWait(firefox, 10)
 

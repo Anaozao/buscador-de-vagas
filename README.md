@@ -20,3 +20,9 @@ Para utilizar o programa (necessário ter o navegador Firefox):
 
 4 - Rode o aplicativo com o comando:
     python src/scraper/app.py (garanta que o ambiente virtual esteja ativo para funcionar)
+
+
+Para utilizar o programa com o Docker:
+    1 - use o comando docker build -t scraper .
+
+    2 - use o comando docker run -it scraper

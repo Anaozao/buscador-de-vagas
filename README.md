@@ -1,6 +1,6 @@
 Este repositório contém um programa que faz scraping de vagas de trabalho em alguns sites.
 
-Até o momento o programa analisa vagas no Vagas.com e Linkedin.com.
+Até o momento o programa analisa vagas no Vagas, Linkedin e Radartec.
 
 Utilizando Python e Selenium, o programa coleta e salva os dados das vagas em /src/jobs/...
 

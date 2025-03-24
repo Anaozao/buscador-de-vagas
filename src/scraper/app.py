@@ -6,11 +6,9 @@ def choose_plataform():
     print("Escolha a plataforma de empregos: ")
     print("1 - Linkedin")
     print("2 - Vagas")
+    print("3 - Radartec")
 
-    options = {
-        1: "linkedin_scraper",
-        2: "vagas_scraper",
-    }
+    options = {1: "linkedin_scraper", 2: "vagas_scraper", 3: "radartec_scraper"}
 
     option = int(input())
 

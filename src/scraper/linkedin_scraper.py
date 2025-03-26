@@ -4,9 +4,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import TimeoutException
+import os
 import json
 from dotenv import load_dotenv
-import os
+from os import environ
 from tqdm import tqdm
 from datetime import datetime
 
@@ -15,11 +17,15 @@ from selenium.webdriver.support import expected_conditions as EC
 
 load_dotenv()
 
+environment = environ.get("ENVIRONMENT") or None
+
 url = "https://www.linkedin.com/jobs/"
 options = Options()
-# options.add_argument("--headless")
+if environment == "CONTAINER":
+    options.add_argument("-headless")
 
 firefox = webdriver.Firefox(options=options)
+wait = WebDriverWait(firefox, 10)
 
 
 def select_time_range(selected_time_range, time_options):
@@ -37,7 +43,7 @@ def select_time_range(selected_time_range, time_options):
         select_time_range(new_option, time_options)
 
 
-def login(wait: WebDriverWait, env_email="", env_pass=""):
+def login(env_email="", env_pass=""):
     if env_email and env_pass:
         email_input = wait.until(EC.presence_of_element_located((By.ID, "session_key")))
         email_input.send_keys(env_email)
@@ -79,7 +85,7 @@ def login(wait: WebDriverWait, env_email="", env_pass=""):
         return False
 
 
-def search(wait: WebDriverWait):
+def search():
     search_input = wait.until(
         EC.presence_of_element_located((By.CLASS_NAME, "jobs-search-box__text-input"))
     )
@@ -113,21 +119,33 @@ def search(wait: WebDriverWait):
 
 
 def scrape_jobs():
-    jobs_cards = firefox.find_elements(By.CLASS_NAME, "job-card-container")
-
-    while True:
-        last_job = jobs_cards[-1]
-        last_job.location_once_scrolled_into_view
-        sleep(2)
-
-        new_jobs_cards = firefox.find_elements(By.CLASS_NAME, "job-card-container")
-
-        if len(new_jobs_cards) == len(jobs_cards):
-            break
-
-        jobs_cards = new_jobs_cards
-
     jobs = []
+    try:
+        jobs_cards = wait.until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "job-card-container"))
+        )
+
+        while True:
+            last_job = jobs_cards[-1]
+            last_job.location_once_scrolled_into_view
+            sleep(2)
+
+            new_jobs_cards = wait.until(
+                EC.presence_of_all_elements_located(
+                    (By.CLASS_NAME, "job-card-container")
+                )
+            )
+
+            if len(new_jobs_cards) == len(jobs_cards):
+                break
+
+            jobs_cards = new_jobs_cards
+    except TimeoutException:
+        print("Nenhuma vaga encontrada.")
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
+        return jobs
+
     for job in jobs_cards:
         jobs_links = job.find_element(By.CLASS_NAME, "job-card-container__link")
 
@@ -142,7 +160,7 @@ def scrape_jobs():
         job_data = {"name": job_name, "location": metadata_info, "link": job_link}
 
         jobs.append(job_data)
-        return jobs
+    return jobs
 
 
 def save_jobs(jobs):
@@ -170,9 +188,9 @@ def run():
     env_email = os.getenv("LINKEDIN_EMAIL") or ""
     env_pass = os.getenv("LINKEDIN_PASSWORD") or ""
 
-    if login(wait, env_email=env_email, env_pass=env_pass) is True:
+    if login(env_email=env_email, env_pass=env_pass) is True:
 
-        search(wait)
+        search()
 
         jobs = scrape_jobs()
 

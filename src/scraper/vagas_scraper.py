@@ -7,9 +7,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import datetime
 from time import sleep
+from os import environ
+
+environment = environ.get("ENVIRONMENT") or None
 
 options = Options()
-options.add_argument("--headless")
+
+if environment == "CONTAINER":
+    options.add_argument("-headless")
 
 firefox = webdriver.Firefox(options=options)
 wait = WebDriverWait(firefox, 10)

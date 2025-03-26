@@ -3,15 +3,23 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-from tqdm import tqdm
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from datetime import datetime
+from tqdm import tqdm
 from time import sleep
 from vagas_scraper import is_looping
+from os import environ
+
+
+environment = environ.get("ENVIRONMENT") or None
 
 options = Options()
-options.add_argument("-headless")
+
+if environment == "CONTAINER":
+    options.add_argument("-headless")
+
 firefox = webdriver.Firefox(options=options)
 wait = WebDriverWait(firefox, 10)
 
@@ -42,27 +50,34 @@ def set_filers():
 
 
 def get_jobs():
-    jobs_cards = wait.until(
-        EC.presence_of_all_elements_located((By.CLASS_NAME, "vote-item"))
-    )
-
     formatted_jobs = []
+    try:
+        jobs_cards = wait.until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "vote-item"))
+        )
+        for job in jobs_cards:
+            job_title = job.find_element(By.CLASS_NAME, "vote-title").text
+            job_link = job.find_element(By.CLASS_NAME, "vote-title").get_attribute(
+                "href"
+            )
+            job_salary = job.find_element(By.CLASS_NAME, "salario").text
+            job_location = job.find_element(By.CLASS_NAME, "cidade").text
+            job_post_date = job.find_element(By.CLASS_NAME, "info-data").text
 
-    for job in jobs_cards:
-        job_title = job.find_element(By.CLASS_NAME, "vote-title").text
-        job_link = job.find_element(By.CLASS_NAME, "vote-title").get_attribute("href")
-        job_salary = job.find_element(By.CLASS_NAME, "salario").text
-        job_location = job.find_element(By.CLASS_NAME, "cidade").text
-        job_post_date = job.find_element(By.CLASS_NAME, "info-data").text
+            new_job = {
+                "name": job_title,
+                "salary": job_salary,
+                "location": job_location,
+                "post_date": job_post_date.strip(),
+                "link": job_link,
+            }
+            formatted_jobs.append(new_job)
 
-        new_job = {
-            "name": job_title,
-            "salary": job_salary,
-            "location": job_location,
-            "post_date": job_post_date.strip(),
-            "link": job_link,
-        }
-        formatted_jobs.append(new_job)
+    except TimeoutException:
+        print("Nenhuma vaga encontrada.")
+    except Exception as e:
+        print(f"Erro inesperado: {e}")
+
     return formatted_jobs
 
 
@@ -99,13 +114,17 @@ def run():
             sleep(0.5)
             set_filers()
             sleep(0.5)
-            save_jobs(get_jobs())
+            jobs = get_jobs()
+            if len(jobs) > 0:
+                save_jobs(jobs)
             sleep(is_loop[0])
     else:
         search_job(query)
         sleep(0.5)
         set_filers()
         sleep(0.5)
-        save_jobs(get_jobs())
+        jobs = get_jobs()
+        if len(jobs) > 0:
+            save_jobs(jobs)
 
     firefox.quit()

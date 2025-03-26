@@ -110,6 +110,7 @@ def run():
         while times < is_loop[1]:
             times += 1
             firefox.get("https://radartec.com.br/")
+            print("Buscando vagas")
             search_job(query)
             sleep(0.5)
             set_filers()

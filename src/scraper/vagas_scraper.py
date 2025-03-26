@@ -1,13 +1,14 @@
 import json
+from tqdm import tqdm
+from time import sleep
+from os import environ
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.firefox.options import Options
-from tqdm import tqdm
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
-from datetime import datetime
-from time import sleep
-from os import environ
 
 environment = environ.get("ENVIRONMENT") or None
 
@@ -21,14 +22,18 @@ wait = WebDriverWait(firefox, 10)
 
 
 def get_jobs():
-    jobs_cards = wait.until(
-        EC.presence_of_all_elements_located((By.CLASS_NAME, "vaga"))
-    )
-    return jobs_cards
+    try:
+
+        jobs_cards = wait.until(
+            EC.presence_of_all_elements_located((By.CLASS_NAME, "vaga"))
+        )
+        return jobs_cards
+    except TimeoutException:
+        print("Nenhuma Vaga Encontrada.")
+        return []
 
 
-def format_jobs_data():
-    jobs = get_jobs()
+def format_jobs_data(jobs: list):
 
     jobs_list = []
 
@@ -123,9 +128,14 @@ def run():
         while times < is_loop[1]:
             times += 1
             firefox.get("https://www.vagas.com.br/vagas-de-" + query)
-            save_jobs(format_jobs_data())
+            print("Buscando vagas")
+            jobs = get_jobs()
+            if len(jobs) > 0:
+                save_jobs(format_jobs_data(jobs))
             sleep(is_loop[0])
     else:
-        save_jobs(format_jobs_data())
+        jobs = get_jobs()
+        if len(jobs) > 0:
+            save_jobs(format_jobs_data(jobs))
 
     firefox.quit()

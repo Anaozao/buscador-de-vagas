@@ -23,6 +23,10 @@ Para utilizar o programa (necessário ter o navegador Firefox):
 
 
 Para utilizar o programa com o Docker:
-    1 - use o comando docker build -t scraper .
+    1 - Rode o comando: docker build -t scraper .
 
-    2 - use o comando docker run -it scraper
+    2 - Rode o comando: 
+        Se estiver no Linux -> docker run --rm -it -v "$(pwd)/src:/app" meu-app
+       
+        Se estiver no Windows -> docker run --rm -it -v "${PWD}/src:/app/src" scraper
+
